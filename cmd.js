@@ -19,7 +19,6 @@ fs.readFile(fileName, "utf8", function(err, data) {
 
 	var builder = require("./lib/model");
 	var model = builder.parse(ast[1]);
-	//console.log(model);
 
 	var formatter = require("./lib/formatter");
 	var out = formatter[format](model);
