@@ -1,0 +1,24 @@
+{
+  "name": "createjs-def",
+  "version": "0.1",
+  "description": "CreateJS Toolkit definitions generator",
+  "main": "cmd.js",
+  "bin": {
+    "createjs-def": "cmd.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/elsassph/createjs-def.git"
+  },
+  "keywords": [
+    "createjs",
+    "typescript",
+    "haxe"
+  ],
+  "author": {
+    "name": "Philippe Elsass"
+  },
+  "license": "MIT",
+  "readme": "Generate definition files for various languages from Flash Professional's CreateJS Toolkit's generated JavaScript library.",
+  "readmeFilename": "README.md"
+}

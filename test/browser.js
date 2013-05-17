@@ -1,3 +1,6 @@
+/**
+ * For testing in browser the library AST and generated model
+ */
 
 var req = new XMLHttpRequest();
 req.onreadystatechange = function(result, b) {
