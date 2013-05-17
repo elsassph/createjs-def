@@ -1,21 +1,42 @@
 ;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
+/**
+ * For testing in browser the library AST and generated model
+ */
 
-var req = new XMLHttpRequest();
-req.onreadystatechange = function(result, b) {
-	if (req.readyState != 4) return;
+var req1 = new XMLHttpRequest();
+req1.onreadystatechange = function(result, b) {
+	if (req1.readyState != 4) return;
 	
-	var jsp = require("../lib/parse-js");
-	var ast = jsp.parse(req.responseText);
+	var html = req1.responseText;
+	var reManifest = /var manifest[\s\S]*\];/m;
+	var m = reManifest.exec(html);
+	var manifest = m ? m[0] : null;
+	console.info("\t"+manifest);
 
-	var builder = require("../lib/model");
-	var model = builder.parse(ast[1]);
-	console.info(model);
+	var req = new XMLHttpRequest();
+	req.onreadystatechange = function(result, b) {
+		if (req.readyState != 4) return;
+		
+		var jsp = require("../lib/parse-js");
+		var ast = jsp.parse(req.responseText);
+
+		var builder = require("../lib/model");
+		var model = builder.parse(ast[1]);
+		console.info(model);
+	}
+	req.open("GET", "Sea.js", false);
+	req.send();
 }
-req.open("GET", "bilbo-walkcycle-side.js", false);
-req.send();
-
+req1.open("GET", "Sea.html", false);
+req1.send();
 
 },{"../lib/model":2,"../lib/parse-js":3}],2:[function(require,module,exports){
+/**
+ * Parse a generated (by CreateJS Toolkit) JavaScript library
+ * and create a simplified model of the classes
+ */
+
+
 function isArray(v) {
 	return v && (typeof v == "object") && (typeof v.push != "undefined");
 }

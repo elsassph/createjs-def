@@ -13,6 +13,5 @@ req.onreadystatechange = function(result, b) {
 	var model = builder.parse(ast[1]);
 	console.info(model);
 }
-req.open("GET", "bilbo-walkcycle-side.js", false);
+req.open("GET", "sea/Sea.js", false);
 req.send();
-

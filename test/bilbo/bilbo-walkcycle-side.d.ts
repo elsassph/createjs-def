@@ -1,4 +1,4 @@
-/// <reference path="easeljs.d.ts" />
+/// <reference path="easeljs/easeljs.d.ts" />
 
 module lib {
 

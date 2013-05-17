@@ -7,6 +7,7 @@ var fileName = process.argv[3];
 
 
 var fs = require("fs");
+
 fs.readFile(fileName, "utf8", function(err, data) {
 
 	if (err) {
@@ -23,5 +24,4 @@ fs.readFile(fileName, "utf8", function(err, data) {
 	var formatter = require("./lib/formatter");
 	var out = formatter[format](model);
 	console.log(out);
-
 });
