@@ -10,6 +10,8 @@ interactive experiences for HTML5._
 Install
 -------
 
+This tool requires http://nodejs.org
+
     npm install -g createjs-def
 
 Usage
