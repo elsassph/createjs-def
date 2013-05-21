@@ -19,6 +19,8 @@ You can copy them in your Flash Professional commands:
  * C:\Users\username\AppData\Local\Adobe\Flash CS6\language\Configuration\
  * /Users/username/Library/Application Support/Adobe/Flash CS6/language/Configuration/
 
+**No configuration needed,** it automatically reads the CreateJS toolkit's metadatas to find where the JS file is located!
+
 Hint: you can add a shortcut to the command in Flash Pro Keyboard Shortcuts settings.
 
 
