@@ -1,6 +1,6 @@
 {
   "name": "createjs-def",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "CreateJS Toolkit definitions generator",
   "bin": {
     "createjs-def": "bin/createjs-def"
