@@ -7,15 +7,29 @@ _The Flash Professional Toolkit for CreateJS is an extension to Adobe Flash Prof
 you to publish animated assets for use with the CreateJS suite of open source JS libraries to create rich, 
 interactive experiences for HTML5._
 
-Install
+JSFL version
 -------
 
-This tool requires http://nodejs.org
+**Download the scripts:**
+
+ * [Generate Typescript Definitions.jsfl](https://raw.github.com/elsassph/createjs-def/master/jsfl/Generate%20Typescript%20Definitions.jsfl)
+ * [Generate Haxe Definitions.jsfl](https://raw.github.com/elsassph/createjs-def/master/jsfl/Generate%20Haxe%20Definitions.jsfl)
+
+You can copy them in your Flash Professional commands:
+ * C:\Users\username\AppData\Local\Adobe\Flash CS6\language\Configuration\
+ * /Users/username/Library/Application Support/Adobe/Flash CS6/language/Configuration/
+
+Hint: you can add a shortcut to the command in Flash Pro Keyboard Shortcuts settings.
+
+
+Node.js version
+-------
+
+**Installation:**
 
     npm install -g createjs-def
 
-Usage
------
+**Usage:**
 
     createjs-def typescript animation-lib.js > animation-lib.d.ts
     createjs-def haxe animation-lib.js > AnimationLib.hx
