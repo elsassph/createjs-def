@@ -1,4 +1,4 @@
-;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
+;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var fpex = require("../lib/flashpro-export");
 fpex.run("haxe", ".hx", true);
 },{"../lib/flashpro-export":2}],2:[function(require,module,exports){
@@ -96,7 +96,281 @@ function generateDefinitions(format) {
 	fl.trace("Definitions file for " + format + " was generated successfuly");
 }
 
-},{"../lib/parse-js":3,"../lib/model":4,"../lib/formatter":5}],3:[function(require,module,exports){
+},{"../lib/formatter":3,"../lib/model":4,"../lib/parse-js":5}],3:[function(require,module,exports){
+/**
+ * Output a typed definition file from the simplified model (see model.js)
+ */
+
+var easeljs = { MovieClip:true, Container:true, Shape:true, Bitmap:true, Rectangle:true, Text:true, Shadow:true };
+
+
+function formatTypescript(model) {
+
+	var out = "";
+	var known = {};
+
+	for(var i in model.classes) {
+		var classDef = model.classes[i];
+		var cname = classDef.name;
+		known[cname] = true;
+	}
+
+	function safeType(cname) {
+		cname = cname.split(".").pop();
+		if (easeljs[cname]) return "createjs." + cname;
+		else return cname;
+	}
+
+	for(var i in model.classes) {
+		var classDef = model.classes[i];
+		
+		var cname = safeType(classDef.name);
+		var bname = safeType(classDef.base);
+		if (easeljs[bname]) bname = "createjs." + bname;
+
+		out += "\texport class " + cname + " extends " + bname + " {\n";
+
+		if (classDef.bounds) {
+			out += "\t\tstatic nominalBounds: createjs.Rectangle;\n";
+		}
+
+		for(var j in classDef.children) {
+			var child = classDef.children[j];
+			var ctype = safeType(child.type);
+			out += "\t\t" + child.name + ": " + ctype + ";\n";
+		}
+		out += "\t}\n\n";
+	}
+
+	out = "/// <reference path=\"easeljs/easeljs.d.ts\" />\n\n"
+	    + "module " + model.namespaces[0] + " {\n\n" 
+	    + out 
+	    + "}\n";
+	return out;
+}
+
+exports.typescript = formatTypescript;
+exports.ts = formatTypescript;
+
+
+function formatHaxe(model) {
+
+	var out = "";
+	var known = {};
+	var imports = [];
+
+	function importType(bname) {
+		if (easeljs[bname]) bname = "createjs.easeljs." + bname;
+		if (!known[bname]) {
+			known[bname] = true;
+			if (bname.indexOf(".") > 0)
+				imports.push("import " + bname + ";");
+		}
+	}
+
+	function safeType(cname) {
+		cname = cname.split(".").pop();
+		return cname.charAt(0).toUpperCase() + cname.substr(1);
+	}
+
+	for(var i in model.classes) {
+		var classDef = model.classes[i];
+		var cname = safeType(classDef.name);
+		known[cname] = true;
+	}
+
+	for(var i in model.classes) {
+		var classDef = model.classes[i];
+		
+		var cname = safeType(classDef.name);
+		var bname = classDef.base;
+		importType(bname);
+
+		out += "@:native(\"" + classDef.name + "\")\n";
+		out += "extern class " + cname + " extends " + bname + " {\n";
+
+		if (classDef.bounds) {
+			out += "\tstatic public var nominalBounds:Rectangle;\n";
+			importType("Rectangle");
+		}
+
+		for(var j in classDef.children) {
+			var child = classDef.children[j];
+			var ctype = safeType(child.type);
+			importType(ctype);
+			out += "\tpublic var " + child.name + ":" + ctype + ";\n";
+		}
+		out += "}\n\n";
+	}
+
+
+	out = "package " + model.namespaces[0] + ";\n\n" 
+	    + imports.join("\n") + "\n\n" 
+	    + out;
+	return out;
+}
+
+exports.haxe = formatHaxe;
+exports.hx = formatHaxe;
+
+},{}],4:[function(require,module,exports){
+/**
+ * Parse a generated (by CreateJS Toolkit) JavaScript library
+ * and create a simplified model of the classes
+ */
+
+
+function isArray(v) {
+	return v && (typeof v == "object") && (typeof v.push != "undefined");
+}
+
+function dump(a, tab) {
+	var out = "";
+	if (!tab) tab = "";
+	for(var i in a) {
+		var v = a[i];
+		if (isArray(v))
+			out += dump(v, tab+"  ");
+		else 
+			out += tab + v + "\n";
+	}
+	return out;
+}
+
+function flatten(a, maxDepth) {
+	if (!isArray(a)) return [a];
+	var out = [];
+	for(var i in a) {
+		var v = a[i];
+		if (isArray(v)) {
+			if (maxDepth != 0)
+				out = out.concat(flatten(v, maxDepth-1));
+			else
+				out.push(v);
+		}
+		else 
+			out.push(v);
+	}
+	return out;
+}
+
+function extract(a, pattern) {
+	var out = [];
+	for(var i=0; i<a.length; i++) {
+		if (pattern[i] == "<?>") out.push(a[i]);
+		else if (a[i] != pattern[i]) return null;
+	}
+	return out;
+}
+
+function extractNum(a) {
+	var sign = 1;
+	if (a[0] == "unary-prefix" && a[1] == "-") {
+		sign = -1;
+		a = a[2];
+	}
+	if (a[0] == "num") return sign * a[1];
+	return 0;
+}
+
+function extractType(typeDef) {
+	var typeSig = flatten(typeDef, 1);
+	// other symbol
+	var res = extract(typeSig, ["dot", "name", "<?>", "<?>"]);
+	if (res) return res.join(".");
+	// base type
+	res = extract(typeSig, ["name", "<?>"]);
+	return ""+res;
+}
+
+function extractChildren(bodyDef) {
+	var children = [];
+	// is the body valid?
+	var bodySig = flatten(bodyDef, 0);
+	var res = extract(bodySig, ["function", null, "<?>", "<?>"]);
+	if (!res) return children;
+	// extract child definitions
+	var defs = res[1];
+	for(var i=0; i<defs.length; i++) {
+		var def = flatten(defs[i], 2);
+		var res = extract(def, ["stat", "assign", true, "dot", "<?>", "<?>", "new", "<?>", "<?>"]);
+		if (res) {
+			var typeName = extractType(res[2]);
+			children.push({ name:res[1], type:typeName });
+		}
+	}
+	return children;
+}
+
+function extractClass(classSig, extendsSig) {
+	if (classSig[0] != "assign") return null;
+
+	// check class declaration
+	var classDef = flatten(classSig[2]);
+	var extendsDef = flatten(extendsSig);
+	//console.log("class?", classDef, extendsDef);
+	var res = extract(classDef, ["dot", "name", "<?>", "<?>"]); // class name
+	var res2 = extract(extendsDef, ["new", "dot", "name", "cjs", "<?>"]); // base class
+	if (!res || !res2) return null;
+	// it's a valid class
+	var sig = {
+		name: res.join("."),
+		base: res2[0],
+		children: extractChildren(classSig[3])
+	};
+	//console.info("new class", sig.name, "extends", sig.base);
+	return sig;
+}
+
+function extractBounds(a) {
+	return [ extractNum(a[0]), extractNum(a[1]), extractNum(a[2]), extractNum(a[3])];
+}
+
+function parseTopLevel(ast) {
+
+	var struct = flatten(ast, 1);
+	var res = extract(struct, ["stat", "<?>", "var", "<?>"]);
+	if (!res) return null;
+
+	var ns = flatten(res[1]);
+	var defs = flatten(res[0], 2);
+	
+	var classes = [];
+	var curClass = null;
+	for(var i=0; i<defs.length; i++) {
+		var def = defs[i];
+		if (!isArray(def) || !def.length) continue;
+		var sig = flatten(def, 2);
+		// is it a class?
+		var res = extract(sig, ["stat", "assign", true, "dot", "<?>", "prototype", "assign", true, "<?>", "<?>"]);
+		if (res) {
+			var newClass = extractClass(res[0], res[2]);
+			if (newClass != null) {
+				curClass = newClass;
+				classes.push(newClass);
+			}
+		}
+		else if (curClass) {
+			// is it the previously defined class' nominalBounds?
+			res = extract(sig, ["stat", "assign", true, "dot", "<?>", "nominalBounds", "new", "<?>", "<?>"]);
+			if (res && isArray(res[2])) {
+				curClass.bounds = extractBounds(res[2]);
+				//console.info("with bounds", curClass.bounds);
+			}
+			// unknown
+			//else console.info("???", sig);
+		}
+	}
+
+	return {
+		namespaces: ns,
+		classes: classes
+	}
+}
+
+exports.parse = parseTopLevel;
+
+},{}],5:[function(require,module,exports){
 /***********************************************************************
 
   A JavaScript tokenizer / parser / beautifier / compressor.
@@ -1466,280 +1740,6 @@ exports.set_logger = function(logger) {
 // Local variables:
 // js-indent-level: 4
 // End:
-
-},{}],4:[function(require,module,exports){
-/**
- * Parse a generated (by CreateJS Toolkit) JavaScript library
- * and create a simplified model of the classes
- */
-
-
-function isArray(v) {
-	return v && (typeof v == "object") && (typeof v.push != "undefined");
-}
-
-function dump(a, tab) {
-	var out = "";
-	if (!tab) tab = "";
-	for(var i in a) {
-		var v = a[i];
-		if (isArray(v))
-			out += dump(v, tab+"  ");
-		else 
-			out += tab + v + "\n";
-	}
-	return out;
-}
-
-function flatten(a, maxDepth) {
-	if (!isArray(a)) return [a];
-	var out = [];
-	for(var i in a) {
-		var v = a[i];
-		if (isArray(v)) {
-			if (maxDepth != 0)
-				out = out.concat(flatten(v, maxDepth-1));
-			else
-				out.push(v);
-		}
-		else 
-			out.push(v);
-	}
-	return out;
-}
-
-function extract(a, pattern) {
-	var out = [];
-	for(var i=0; i<a.length; i++) {
-		if (pattern[i] == "<?>") out.push(a[i]);
-		else if (a[i] != pattern[i]) return null;
-	}
-	return out;
-}
-
-function extractNum(a) {
-	var sign = 1;
-	if (a[0] == "unary-prefix" && a[1] == "-") {
-		sign = -1;
-		a = a[2];
-	}
-	if (a[0] == "num") return sign * a[1];
-	return 0;
-}
-
-function extractType(typeDef) {
-	var typeSig = flatten(typeDef, 1);
-	// other symbol
-	var res = extract(typeSig, ["dot", "name", "<?>", "<?>"]);
-	if (res) return res.join(".");
-	// base type
-	res = extract(typeSig, ["name", "<?>"]);
-	return ""+res;
-}
-
-function extractChildren(bodyDef) {
-	var children = [];
-	// is the body valid?
-	var bodySig = flatten(bodyDef, 0);
-	var res = extract(bodySig, ["function", null, "<?>", "<?>"]);
-	if (!res) return children;
-	// extract child definitions
-	var defs = res[1];
-	for(var i=0; i<defs.length; i++) {
-		var def = flatten(defs[i], 2);
-		var res = extract(def, ["stat", "assign", true, "dot", "<?>", "<?>", "new", "<?>", "<?>"]);
-		if (res) {
-			var typeName = extractType(res[2]);
-			children.push({ name:res[1], type:typeName });
-		}
-	}
-	return children;
-}
-
-function extractClass(classSig, extendsSig) {
-	if (classSig[0] != "assign") return null;
-
-	// check class declaration
-	var classDef = flatten(classSig[2]);
-	var extendsDef = flatten(extendsSig);
-	//console.log("class?", classDef, extendsDef);
-	var res = extract(classDef, ["dot", "name", "<?>", "<?>"]); // class name
-	var res2 = extract(extendsDef, ["new", "dot", "name", "cjs", "<?>"]); // base class
-	if (!res || !res2) return null;
-	// it's a valid class
-	var sig = {
-		name: res.join("."),
-		base: res2[0],
-		children: extractChildren(classSig[3])
-	};
-	//console.info("new class", sig.name, "extends", sig.base);
-	return sig;
-}
-
-function extractBounds(a) {
-	return [ extractNum(a[0]), extractNum(a[1]), extractNum(a[2]), extractNum(a[3])];
-}
-
-function parseTopLevel(ast) {
-
-	var struct = flatten(ast, 1);
-	var res = extract(struct, ["stat", "<?>", "var", "<?>"]);
-	if (!res) return null;
-
-	var ns = flatten(res[1]);
-	var defs = flatten(res[0], 2);
-	
-	var classes = [];
-	var curClass = null;
-	for(var i=0; i<defs.length; i++) {
-		var def = defs[i];
-		if (!isArray(def) || !def.length) continue;
-		var sig = flatten(def, 2);
-		// is it a class?
-		var res = extract(sig, ["stat", "assign", true, "dot", "<?>", "prototype", "assign", true, "<?>", "<?>"]);
-		if (res) {
-			var newClass = extractClass(res[0], res[2]);
-			if (newClass != null) {
-				curClass = newClass;
-				classes.push(newClass);
-			}
-		}
-		else if (curClass) {
-			// is it the previously defined class' nominalBounds?
-			res = extract(sig, ["stat", "assign", true, "dot", "<?>", "nominalBounds", "new", "<?>", "<?>"]);
-			if (res && isArray(res[2])) {
-				curClass.bounds = extractBounds(res[2]);
-				//console.info("with bounds", curClass.bounds);
-			}
-			// unknown
-			//else console.info("???", sig);
-		}
-	}
-
-	return {
-		namespaces: ns,
-		classes: classes
-	}
-}
-
-exports.parse = parseTopLevel;
-
-},{}],5:[function(require,module,exports){
-/**
- * Output a typed definition file from the simplified model (see model.js)
- */
-
-var easeljs = { MovieClip:true, Container:true, Shape:true, Bitmap:true, Rectangle:true, Text:true };
-
-
-function formatTypescript(model) {
-
-	var out = "";
-	var known = {};
-
-	for(var i in model.classes) {
-		var classDef = model.classes[i];
-		var cname = classDef.name;
-		known[cname] = true;
-	}
-
-	function safeType(cname) {
-		cname = cname.split(".").pop();
-		if (easeljs[cname]) return "createjs." + cname;
-		else return cname;
-	}
-
-	for(var i in model.classes) {
-		var classDef = model.classes[i];
-		
-		var cname = safeType(classDef.name);
-		var bname = safeType(classDef.base);
-		if (easeljs[bname]) bname = "createjs." + bname;
-
-		out += "\texport class " + cname + " extends " + bname + " {\n";
-
-		if (classDef.bounds) {
-			out += "\t\tstatic nominalBounds: createjs.Rectangle;\n";
-		}
-
-		for(var j in classDef.children) {
-			var child = classDef.children[j];
-			var ctype = safeType(child.type);
-			out += "\t\t" + child.name + ": " + ctype + ";\n";
-		}
-		out += "\t}\n\n";
-	}
-
-	out = "/// <reference path=\"easeljs/easeljs.d.ts\" />\n\n"
-	    + "module " + model.namespaces[0] + " {\n\n" 
-	    + out 
-	    + "}\n";
-	return out;
-}
-
-exports.typescript = formatTypescript;
-exports.ts = formatTypescript;
-
-
-function formatHaxe(model) {
-
-	var out = "";
-	var known = {};
-	var imports = [];
-
-	function importType(bname) {
-		if (easeljs[bname]) bname = "createjs.easeljs." + bname;
-		if (!known[bname]) {
-			known[bname] = true;
-			if (bname.indexOf(".") > 0)
-				imports.push("import " + bname + ";");
-		}
-	}
-
-	function safeType(cname) {
-		cname = cname.split(".").pop();
-		return cname.charAt(0).toUpperCase() + cname.substr(1);
-	}
-
-	for(var i in model.classes) {
-		var classDef = model.classes[i];
-		var cname = safeType(classDef.name);
-		known[cname] = true;
-	}
-
-	for(var i in model.classes) {
-		var classDef = model.classes[i];
-		
-		var cname = safeType(classDef.name);
-		var bname = classDef.base;
-		importType(bname);
-
-		out += "@:native(\"" + classDef.name + "\")\n";
-		out += "extern class " + cname + " extends " + bname + " {\n";
-
-		if (classDef.bounds) {
-			out += "\tstatic public var nominalBounds:Rectangle;\n";
-			importType("Rectangle");
-		}
-
-		for(var j in classDef.children) {
-			var child = classDef.children[j];
-			var ctype = safeType(child.type);
-			importType(ctype);
-			out += "\tpublic var " + child.name + ":" + ctype + ";\n";
-		}
-		out += "}\n\n";
-	}
-
-
-	out = "package " + model.namespaces[0] + ";\n\n" 
-	    + imports.join("\n") + "\n\n" 
-	    + out;
-	return out;
-}
-
-exports.haxe = formatHaxe;
-exports.hx = formatHaxe;
 
 },{}]},{},[1])
 ;
