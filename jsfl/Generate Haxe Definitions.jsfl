@@ -22,7 +22,25 @@ function getDocument() {
 }
 
 function getProps() {
-	props = deserialize(doc.getDataFromDocument(DOC_DATA_NAME));
+  props = null;
+  
+  // HTML5 FLAs
+	var profiles = XML(doc.exportPublishProfileString()).PublishProperties;
+	for(var i=0; i<profiles.length(); i++) {
+		var profile = profiles[i];
+		if (profile["@name"] == 'JavaScript/HTML') {
+			props = {};
+			var list = profile.Property;
+			for(var i=0; i<list.length(); i++)
+				props[list[i]["@name"]] = list[i].toString();
+			break;
+	  }
+  }
+  
+	// old plugin
+  if (props == null)
+		props = deserialize(doc.getDataFromDocument(DOC_DATA_NAME));
+  
 	return props != null;
 }
 
@@ -121,6 +139,14 @@ function formatTypescript(model) {
 		else return cname;
 	}
 
+	out += "\texport class properties implements Object {\n"
+		 + "\t\tstatic width: number;\n"
+		 + "\t\tstatic height: number;\n"
+		 + "\t\tstatic fps: number;\n"
+		 + "\t\tstatic color: string;\n"
+		 + "\t\tstatic manifest: Object[];\n"
+		 + "\t}\n\n";
+
 	for(var i in model.classes) {
 		var classDef = model.classes[i];
 		
@@ -143,7 +169,7 @@ function formatTypescript(model) {
 	}
 
 	out = "/// <reference path=\"easeljs/easeljs.d.ts\" />\n\n"
-	    + "module " + model.namespaces[0] + " {\n\n" 
+	    + "declare module " + model.namespaces[0] + " {\n\n" 
 	    + out 
 	    + "}\n";
 	return out;
@@ -172,6 +198,15 @@ function formatHaxe(model) {
 		cname = cname.split(".").pop();
 		return cname.charAt(0).toUpperCase() + cname.substr(1);
 	}
+	
+	out += "@:native(\"lib.properties\")\n"
+	   + "extern class Properties {\n"
+		 + "\tpublic static var width:Int;\n"
+		 + "\tpublic static var height:Int;\n"
+		 + "\tpublic static var fps:Int;\n"
+		 + "\tpublic static var color:Int;\n"
+		 + "\tpublic static var manifest:Dynamic;\n"
+		 + "}\n\n";
 
 	for(var i in model.classes) {
 		var classDef = model.classes[i];
