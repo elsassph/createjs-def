@@ -1,9 +1,9 @@
 CreateJS Toolkit definitions generator
 ======================================
 
-Generate definition files for various languages from CreateJS Toolkit's generated JavaScript library.
+Generate definition files for various languages from Adobe Flash CC's HTML5 output.
 
-_The Flash Professional Toolkit for CreateJS is an extension to Adobe Flash Professional CS6 that allows 
+_Adobe Flash CC (or CS6 with the CreateJS Toolkit) allows 
 you to publish animated assets for use with the CreateJS suite of open source JS libraries to create rich, 
 interactive experiences for HTML5._
 
@@ -16,10 +16,10 @@ JSFL version
  * [Generate Haxe Definitions.jsfl](https://raw.github.com/elsassph/createjs-def/master/jsfl/Generate%20Haxe%20Definitions.jsfl)
 
 You can copy them in your Flash Professional commands:
- * C:\Users\username\AppData\Local\Adobe\Flash CS6\language\Configuration\
- * /Users/username/Library/Application Support/Adobe/Flash CS6/language/Configuration/
+ * C:\Users\username\AppData\Local\Adobe\Flash CC\language\Configuration\
+ * /Users/username/Library/Application Support/Adobe/Flash CC/language/Configuration/
 
-**No configuration needed,** it automatically reads the CreateJS toolkit's metadatas to find where the JS file is located!
+**No configuration needed,** it automatically reads the HTML5 Publish Settings or CreateJS Toolkit's metadatas to find where the JS file is located!
 
 Hint: you can add a shortcut to the command in Flash Pro Keyboard Shortcuts settings.
 
