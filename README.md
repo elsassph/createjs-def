@@ -35,3 +35,17 @@ Node.js version
 
     createjs-def typescript animation-lib.js > animation-lib.d.ts
     createjs-def haxe animation-lib.js > AnimationLib.hx
+
+Node.js code
+------
+
+Can be used in your own grunt task or in a custom javascript file you created.
+
+**Usage**
+
+    var fs = require("fs");
+    var createjs = require('createjs-def');
+
+    var animation_data = fs.readFileSync('animation-lib.js');
+    var data = createjs.createDef(animation_data, 'typescript');
+    fs.writeFile('animation-lib.d.ts', data);
