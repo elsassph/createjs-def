@@ -5,6 +5,7 @@
   "bin": {
     "createjs-def": "bin/createjs-def"
   },
+  "main": "./lib/index",
   "repository": {
     "type": "git",
     "url": "http://github.com/elsassph/createjs-def.git"
