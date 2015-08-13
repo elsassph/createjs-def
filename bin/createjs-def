@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 if (process.argv.length < 4) {
-	console.log("createjs-format <format> <file>");
+	console.log("createjs-format <format> <file> [<easeljs_def_path (for TypeScript only)>]");
 	process.exit();
 }
 var format = process.argv[2];
 var fileName = process.argv[3];
+var easeljsPath = process.argv[4];
 
+if(!easeljsPath){
+	easeljsPath = "easeljs/easeljs.d.ts";
+}
 
 var fs = require("fs");
 
@@ -23,6 +27,6 @@ fs.readFile(fileName, "utf8", function(err, data) {
 	var model = builder.parse(ast[1]);
 
 	var formatter = require("../lib/formatter");
-	var out = formatter[format](model);
+	var out = formatter[format](model, easeljsPath);
 	console.log(out);
 });
