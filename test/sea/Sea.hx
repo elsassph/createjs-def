@@ -2,11 +2,20 @@ package lib;
 
 import createjs.easeljs.MovieClip;
 import createjs.easeljs.Rectangle;
-import Text;
-import Shadow;
+import createjs.easeljs.Text;
+import createjs.easeljs.Shadow;
 import createjs.easeljs.Bitmap;
 import createjs.easeljs.Container;
 import createjs.easeljs.Shape;
+
+@:native("lib.properties")
+extern class Properties {
+	public static var width:Int;
+	public static var height:Int;
+	public static var fps:Int;
+	public static var color:Int;
+	public static var manifest:Dynamic;
+}
 
 @:native("lib.Sea")
 extern class Sea extends MovieClip {

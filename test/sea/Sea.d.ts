@@ -1,11 +1,19 @@
 /// <reference path="easeljs/easeljs.d.ts" />
 
-module lib {
+declare module lib {
+
+	export class properties implements Object {
+		static width: number;
+		static height: number;
+		static fps: number;
+		static color: string;
+		static manifest: Object[];
+	}
 
 	export class Sea extends createjs.MovieClip {
 		static nominalBounds: createjs.Rectangle;
-		text: Text;
-		shadow: Shadow;
+		text: createjs.Text;
+		shadow: createjs.Shadow;
 		seaweed: Seaweed;
 		instance: Star;
 		instance_1: Star;
@@ -21,7 +29,7 @@ module lib {
 		seaweed_5: Seaweed;
 		seaweed_6: Seaweed;
 		octopus_3: Octopus;
-		shadow: Shadow;
+		shadow: createjs.Shadow;
 		seaweed_7: Seaweed;
 		octopus_4: Octopus;
 		instance_4: Background;

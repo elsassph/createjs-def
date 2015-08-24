@@ -2,8 +2,18 @@ package lib;
 
 import createjs.easeljs.MovieClip;
 import createjs.easeljs.Rectangle;
+import createjs.easeljs.Shadow;
 import createjs.easeljs.Container;
 import createjs.easeljs.Shape;
+
+@:native("lib.properties")
+extern class Properties {
+	public static var width:Int;
+	public static var height:Int;
+	public static var fps:Int;
+	public static var color:Int;
+	public static var manifest:Dynamic;
+}
 
 @:native("lib.bilbowalkcycleside")
 extern class Bilbowalkcycleside extends MovieClip {

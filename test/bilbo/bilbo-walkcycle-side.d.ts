@@ -1,6 +1,14 @@
 /// <reference path="easeljs/easeljs.d.ts" />
 
-module lib {
+declare module lib {
+
+	export class properties implements Object {
+		static width: number;
+		static height: number;
+		static fps: number;
+		static color: string;
+		static manifest: Object[];
+	}
 
 	export class bilbowalkcycleside extends createjs.MovieClip {
 		static nominalBounds: createjs.Rectangle;
