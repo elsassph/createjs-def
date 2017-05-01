@@ -15,9 +15,9 @@ JSFL version
  * [Generate Typescript Definitions.jsfl](https://raw.github.com/elsassph/createjs-def/master/jsfl/Generate%20Typescript%20Definitions.jsfl)
  * [Generate Haxe Definitions.jsfl](https://raw.github.com/elsassph/createjs-def/master/jsfl/Generate%20Haxe%20Definitions.jsfl)
 
-You can copy them in your Flash Professional commands:
- * C:\Users\username\AppData\Local\Adobe\Flash CC\language\Configuration\
- * /Users/username/Library/Application Support/Adobe/Flash CC/language/Configuration/
+You can copy them in your Animate CC commands:
+ * C:\Users\username\AppData\Local\Adobe\Animate CC\language\Configuration\Commands
+ * /Users/username/Library/Application Support/Adobe/Animate CC/language/Configuration/Commands
 
 **No configuration needed,** it automatically reads the HTML5 Publish Settings or CreateJS Toolkit's metadatas to find where the JS file is located!
 
@@ -47,5 +47,5 @@ Can be used in your own grunt task or in a custom javascript file you created.
     var createjs = require('createjs-def');
 
     var animation_data = fs.readFileSync('animation-lib.js');
-    var data = createjs.createDef(animation_data, 'typescript');
+    var data = createjs.createDef('AnimationLib', animation_data, 'typescript');
     fs.writeFile('animation-lib.d.ts', data);
