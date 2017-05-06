@@ -1,3 +1,8 @@
+#! /usr/bin/env node
+// -*- js -*-
+
+"use strict";
+
 if (process.argv.length < 4) {
 	console.log('createjs-format <format> <file> [<path to easeljs.d.ts (TypeScript)>]');
 	process.exit();
