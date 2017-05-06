@@ -1,14 +1,14 @@
-CreateJS Toolkit definitions generator
-======================================
+# CreateJS Toolkit definitions generator
 
 Generate definition files for various languages from Adobe Flash CC's HTML5 output.
 
-_Adobe Flash CC (or CS6 with the CreateJS Toolkit) allows 
-you to publish animated assets for use with the CreateJS suite of open source JS libraries to create rich, 
+_Adobe Animate CC, formely known as Flash CC, allow you to publish animated assets 
+for use with the CreateJS suite of open source JS libraries to create rich, 
 interactive experiences for HTML5._
 
-JSFL version
--------
+## Transformation
+
+### JSFL version
 
 **Download the scripts:**
 
@@ -19,13 +19,13 @@ You can copy them in your Animate CC commands:
  * C:\Users\username\AppData\Local\Adobe\Animate CC\language\Configuration\Commands
  * /Users/username/Library/Application Support/Adobe/Animate CC/language/Configuration/Commands
 
-**No configuration needed,** it automatically reads the HTML5 Publish Settings or CreateJS Toolkit's metadatas to find where the JS file is located!
+**No configuration needed,** it automatically reads the HTML5 Publish Settings or 
+CreateJS Toolkit's metadatas to find where the JS file is located!
 
 Hint: you can add a shortcut to the command in Flash Pro Keyboard Shortcuts settings.
 
 
-Node.js version
--------
+### Node.js version
 
 **Installation:**
 
@@ -33,19 +33,36 @@ Node.js version
 
 **Usage:**
 
-    createjs-def typescript animation-lib.js > animation-lib.d.ts
-    createjs-def haxe animation-lib.js > AnimationLib.hx
+    createjs-def typescript AnimationLib.js > AnimationLib.d.ts
+    createjs-def haxe AnimationLib.js > AnimationLib.hx
 
-Node.js code
-------
+### Node.js code
 
 Can be used in your own grunt task or in a custom javascript file you created.
 
 **Usage**
 
-    var fs = require("fs");
-    var createjs = require('createjs-def');
+```javascript
+var fs = require("fs");
+var createjs = require('createjs-def');
 
-    var animation_data = fs.readFileSync('animation-lib.js');
-    var data = createjs.createDef('AnimationLib', animation_data, 'typescript');
-    fs.writeFile('animation-lib.d.ts', data);
+var animation_data = fs.readFileSync('AnimationLib.js');
+var data = createjs.createDef('AnimationLib', animation_data, 'typescript');
+fs.writeFile('AnimationLib.d.ts', data);
+```
+
+## TypeScript usage
+
+```html
+<script src="AnimationLib.js"></script>
+<script src="app.js"/></script>
+```
+
+```javascript
+// ambient declaration from AnimationLib.js
+declare const lib: AnimationLib;
+
+var props = lib.properties;
+var comp = new lib.MyComp();
+...
+```
